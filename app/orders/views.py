@@ -1,5 +1,6 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpRequest
+from django.urls import reverse
 from .models import OrderItem
 from .forms import OrderCreateForm
 from .tasks import order_created
@@ -23,7 +24,8 @@ def order_create(request: HttpRequest):
 
             cart.clear()
             order_created.delay(order.id)
-            return render(request=request, template_name='orders/order/created.html', context={'order': order})
+            request.session['order_id'] = order.id
+            return redirect(reverse('payment:process'))
     else:
         form = OrderCreateForm()
 

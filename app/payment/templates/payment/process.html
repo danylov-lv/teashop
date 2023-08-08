@@ -20,7 +20,10 @@
         {% for item in order.items.all %}
         <tr class="row{% cycle '1' '2' %}">
             <td>
-                <img src="{% if item.product.image %}{{ item.product.image.url }}
+                {% if item.product.image %}
+                {% thumbnail item.product.image 180x120 crop quality=100 as im %}
+                {% endif %}
+                <img src="{% if item.product.image %}{{ im.url }}
                           {% else %}{% static 'img/no_image.png' %}{% endif %}">
             </td>
             <td>{{ item.product.name }}</td>

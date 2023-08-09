@@ -4,6 +4,7 @@ from django.http import HttpRequest
 from shop.models import Product
 from .cart import Cart
 from .forms import CartAddProductForm
+from coupons.forms import CouponApplyForm
 
 
 @require_POST
@@ -38,4 +39,11 @@ def cart_detail(request: HttpRequest):
             'override': True
         })
 
-    return render(request=request, template_name=template_name, context={'cart': cart})
+    coupon_apply_form = CouponApplyForm()
+
+    context = {
+        'cart': cart,
+        'coupon_apply_form': coupon_apply_form
+    }
+
+    return render(request=request, template_name=template_name, context=context)

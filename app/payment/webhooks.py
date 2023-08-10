@@ -5,6 +5,7 @@ from django.http import HttpRequest, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from orders.models import Order
 from .tasks import payment_completed
+from shop.recommender import Recommender
 
 
 @csrf_exempt
@@ -31,6 +32,12 @@ def stripe_webhook(request: HttpRequest):
             order.paid = True
             order.stripe_id = session.payment_intent
             order.save()
+
             payment_completed.delay(order.id)
+
+            r = Recommender()
+            products = [item.product for item in order.items.all()]
+
+            r.products_bought(products)
 
     return HttpResponse(status=200)

@@ -1,10 +1,11 @@
 from django.shortcuts import render, get_object_or_404
+from django.http import HttpRequest
 from cart.forms import CartAddProductForm
 from .models import Category, Product
 from .recommender import Recommender
 
 
-def product_list(request, category_slug=None):
+def product_list(request: HttpRequest, category_slug: str = None):
     template_name = 'shop/product/list.html'
 
     category = None
@@ -12,7 +13,10 @@ def product_list(request, category_slug=None):
     products = Product.objects.filter(available=True)
 
     if category_slug:
-        category = get_object_or_404(Category, slug=category_slug)
+        language = request.LANGUAGE_CODE
+        category = get_object_or_404(Category,
+                                     translations__language_code=language,
+                                     translations__slug=category_slug)
         products = products.filter(category=category)
 
     context = {
@@ -24,10 +28,16 @@ def product_list(request, category_slug=None):
     return render(request=request, template_name=template_name, context=context)
 
 
-def product_detail(request, id, slug):
+def product_detail(request: HttpRequest, id: int, slug: str):
     template_name = 'shop/product/detail.html'
 
-    product = get_object_or_404(Product, id=id, slug=slug, available=True)
+    language = request.LANGUAGE_CODE
+
+    product = get_object_or_404(Product,
+                                id=id,
+                                translations__language_code=language,
+                                translations__slug=slug,
+                                available=True)
 
     cart_product_form = CartAddProductForm()
 
